@@ -2,17 +2,14 @@ const express = require('express')
 const router = express.Router()
 const contacts = require('../../models/contacts')
 const { checkToken } = require('../../middlewares/userMiddlewares')
-// const { contactSchema } = require('../../models/contacts');
-// router.get("/", contacts.listContacts);
 
 router.use(checkToken);
-// router.use(checkToken, (req, res) => {
-//   res.json({ message: 'This route is protected!' });
-// });
 
 router.get('/', async (req, res, next) => {
   try {
-    const allContacts = await contacts.listContacts();
+    const ownerId = req.user.id
+    console.log("owner", ownerId)
+    const allContacts = await contacts.listContacts(ownerId);
     console.log('All Contacts:', allContacts);
     res.status(200).json(allContacts);
   } catch (error) {
@@ -37,7 +34,7 @@ router.get('/:contactId', async (req, res, next) => {
 // , { abortEarly: false }
 router.post('/', async (req, res, next) => {
   try {
-    const newContact = await contacts.addContact(req.body);
+    const newContact = await contacts.addContact(req.body, req.user.id);
     res.status(201).json(newContact);
   } catch (error) {
     console.error(error.message);
